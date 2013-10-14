@@ -14,7 +14,7 @@ Puppet::Type.type(:package).provide :homebrew, :parent => Puppet::Provider::Pack
   # A list of `ensure` values that aren't explicit versions.
 
   def self.home
-    "/usr/local/homebrew"
+    "/usr/local"
   end
 
   confine  :operatingsystem => :darwin
@@ -58,20 +58,20 @@ Puppet::Type.type(:package).provide :homebrew, :parent => Puppet::Provider::Pack
       # switch. Somebody might've activated another version for
       # testing or something like that.
 
-      execute [ "#{self.class.home}/bin/brew", "switch", @resource[:name], version ], command_opts
+      execute [ "brew", "switch", @resource[:name], version ], command_opts
 
     elsif self.class.current @resource[:name]
       # Okay, so there's a version already active, it's not the right
       # one, and the right one isn't installed. That's an upgrade.
 
-      execute [ "#{self.class.home}/bin/brew", "upgrade", @resource[:name] ], command_opts
+      execute [ "brew", "upgrade", @resource[:name] ], command_opts
     else
       # Nothing here? Nothing from before? Yay! It's a normal install.
 
       if install_options.any?
-        execute [ "#{self.class.home}/bin/brew", "install", @resource[:name], *install_options ].flatten, command_opts
+        execute [ "brew", "install", @resource[:name], *install_options ].flatten, command_opts
       else
-        execute [ "#{self.class.home}/bin/brew", "install", @resource[:name] ], command_opts
+        execute [ "brew", "install", @resource[:name] ], command_opts
       end
 
     end
@@ -81,13 +81,13 @@ Puppet::Type.type(:package).provide :homebrew, :parent => Puppet::Provider::Pack
     unless self.class.const_defined?(:UPDATED_BREW)
       notice "Updating homebrew formulas"
 
-      execute [ "#{self.class.home}/bin/brew", "update" ], command_opts
+      execute [ "brew", "update" ], command_opts
       self.class.const_set(:UPDATED_BREW, true)
     end
   end
 
   def version_defined? version
-    output = execute([ "#{self.class.home}/bin/brew", "info", @resource[:name] ], command_opts).strip
+    output = execute([ "brew", "info", @resource[:name] ], command_opts).strip
     defined_versions = output.lines.first.strip.split(' ')[2..-1]
 
     defined_versions.include? version
@@ -98,7 +98,7 @@ Puppet::Type.type(:package).provide :homebrew, :parent => Puppet::Provider::Pack
   end
 
   def latest
-    execute([ "#{self.class.home}/bin/brew", "boxen-latest", @resource[:name] ], command_opts).strip
+    execute([ "brew", "boxen-latest", @resource[:name] ], command_opts).strip
   end
 
   def query
@@ -107,7 +107,7 @@ Puppet::Type.type(:package).provide :homebrew, :parent => Puppet::Provider::Pack
   end
 
   def uninstall
-    execute [ "#{self.class.home}/bin/brew", "uninstall", "--force", "#{simplify @resource[:name]}" ], command_opts
+    execute [ "brew", "uninstall", "--force", "#{simplify @resource[:name]}" ], command_opts
   end
 
   def unversioned?
