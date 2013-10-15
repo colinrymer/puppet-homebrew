@@ -6,7 +6,7 @@ Puppet::Type.type(:homebrew_tap).provide :default do
   include Puppet::Util::Execution
 
   def self.home
-    "/usr/local/homebrew"
+    "/usr/local"
   end
 
   def self.taps_dir
